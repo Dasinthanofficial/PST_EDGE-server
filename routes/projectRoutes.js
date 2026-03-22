@@ -9,7 +9,7 @@ router.route('/')
   .get(getProjects)
   .post(protect, upload.single('thumbnail'), createProject);
 
-router.route('/:slug').get(getProjectBySlug);
+router.get('/slug/:slug', getProjectBySlug);
 
 router.route('/:id')
   .put(protect, upload.single('thumbnail'), updateProject)

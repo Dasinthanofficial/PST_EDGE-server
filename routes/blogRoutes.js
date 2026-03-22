@@ -9,7 +9,7 @@ router.route('/')
   .get(getBlogs)
   .post(protect, upload.single('featuredImage'), createBlog);
 
-router.route('/:slug').get(getBlogBySlug);
+router.get('/slug/:slug', getBlogBySlug);
 
 router.route('/:id')
   .put(protect, upload.single('featuredImage'), updateBlog)
