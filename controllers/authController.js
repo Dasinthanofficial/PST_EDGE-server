@@ -6,9 +6,6 @@ const generateToken = (id) => {
   });
 };
 
-// @desc Auth admin & get session
-// @route POST /api/auth/login
-// @access Public
 export const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -32,8 +29,8 @@ export const loginAdmin = async (req, res) => {
 
     res.cookie('jwt', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
@@ -47,23 +44,17 @@ export const loginAdmin = async (req, res) => {
   }
 };
 
-// @desc Logout admin / clear cookie
-// @route POST /api/auth/logout
-// @access Public
 export const logoutAdmin = (req, res) => {
   res.cookie('jwt', '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV !== 'development',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     expires: new Date(0)
   });
 
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
-// @desc Get current admin
-// @route GET /api/auth/me
-// @access Private/Admin
 export const getCurrentAdmin = async (req, res) => {
   res.json({
     _id: req.admin.id,
