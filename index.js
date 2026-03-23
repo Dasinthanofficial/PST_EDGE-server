@@ -21,7 +21,10 @@ app.use(cors({
   origin: allowedOrigin,
   credentials: true
 }));
-app.use(helmet());
+// Fix for helmet blocking local images
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(morgan('dev'));
 app.use(cookieParser());
 
@@ -33,12 +36,14 @@ import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import testimonialRoutes from './routes/testimonialRoutes.js'; // <-- NEW IMPORT
 
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/testimonials', testimonialRoutes); // <-- NEW ROUTE
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running normally.' });
