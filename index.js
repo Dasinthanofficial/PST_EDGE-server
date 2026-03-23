@@ -28,24 +28,17 @@ app.use(cookieParser());
 // Serve static uploads
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
+// Import Routes
 import authRoutes from './routes/authRoutes.js';
-import blogRoutes from './routes/blogRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
-import subscriberRoutes from './routes/subscriberRoutes.js';
-import serviceRoutes from './routes/serviceRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import statsRoutes from './routes/statsRoutes.js';
 
-// Routes
+// Use Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/blogs', blogRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/contact', contactRoutes);
-app.use('/api/subscribers', subscriberRoutes);
-app.use('/api/services', serviceRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/stats', statsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running normally.' });
