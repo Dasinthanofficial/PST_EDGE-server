@@ -8,6 +8,7 @@ export const getProjects = async (req, res) => {
     const projects = await Project.find({}).sort({ createdAt: -1 });
     res.json(projects);
   } catch (error) {
+    console.error("Error in getProjects:", error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -24,6 +25,7 @@ export const getProjectBySlug = async (req, res) => {
       res.status(404).json({ message: 'Project not found' });
     }
   } catch (error) {
+    console.error("Error in getProjectBySlug:", error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -36,8 +38,11 @@ export const createProject = async (req, res) => {
     const { title, slug, category, description, challenge, solution, technologies, liveDemo, githubLink, testimonialQuote, testimonialAuthor } = req.body;
     let thumbnail = '';
     
+    // UPDATED for Cloudinary: req.file.path contains the secure Cloudinary URL
     if (req.file) {
-      thumbnail = `/uploads/${req.file.filename}`;
+      thumbnail = req.file.path; 
+    } else if (req.body.thumbnail) {
+      thumbnail = req.body.thumbnail;
     }
 
     const techArray = Array.isArray(technologies) ? technologies : technologies?.split(',').map(t => t.trim()) || [];
@@ -46,7 +51,7 @@ export const createProject = async (req, res) => {
       title,
       slug,
       category,
-      thumbnail: thumbnail || req.body.thumbnail,
+      thumbnail: thumbnail,
       description,
       challenge,
       solution,
@@ -62,6 +67,7 @@ export const createProject = async (req, res) => {
     const createdProject = await project.save();
     res.status(201).json(createdProject);
   } catch (error) {
+    console.error("Error in createProject:", error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -96,8 +102,9 @@ export const updateProject = async (req, res) => {
           };
       }
 
+      // UPDATED for Cloudinary: req.file.path contains the secure Cloudinary URL
       if (req.file) {
-        project.thumbnail = `/uploads/${req.file.filename}`;
+        project.thumbnail = req.file.path;
       } else if (req.body.thumbnail) {
         project.thumbnail = req.body.thumbnail;
       }
@@ -108,6 +115,7 @@ export const updateProject = async (req, res) => {
       res.status(404).json({ message: 'Project not found' });
     }
   } catch (error) {
+    console.error("Error in updateProject:", error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -119,12 +127,16 @@ export const deleteProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (project) {
+      // Note: This deletes the database record. To delete the image from Cloudinary itself, 
+      // you would normally extract the public_id and use cloudinary.uploader.destroy().
+      // For now, this safely deletes the project from your app.
       await project.deleteOne();
       res.json({ message: 'Project removed' });
     } else {
       res.status(404).json({ message: 'Project not found' });
     }
   } catch (error) {
+    console.error("Error in deleteProject:", error);
     res.status(500).json({ message: error.message });
   }
 };

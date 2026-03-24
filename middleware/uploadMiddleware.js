@@ -1,35 +1,26 @@
 import multer from 'multer';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import dotenv from 'dotenv';
 
-// Setup storage
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    // We will store all uploads here locally
-    cb(null, 'uploads/');
+dotenv.config();
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Setup Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'pst_edge_portfolio', // Folder name in your cloudinary account
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'],
   },
-  filename(req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  }
 });
 
-// Check file type
-const checkFileType = (file, cb) => {
-  const filetypes = /jpg|jpeg|png|webp|avif|gif/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb('Images only!');
-  }
-};
-
-const upload = multer({
-  storage,
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  }
-});
+const upload = multer({ storage });
 
 export default upload;
