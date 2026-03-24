@@ -38,7 +38,7 @@ export const createProject = async (req, res) => {
     const { title, slug, category, description, challenge, solution, technologies, liveDemo, githubLink, testimonialQuote, testimonialAuthor } = req.body;
     let thumbnail = '';
     
-    // UPDATED for Cloudinary: req.file.path contains the secure Cloudinary URL
+    // Cloudinary saves the secure URL in req.file.path
     if (req.file) {
       thumbnail = req.file.path; 
     } else if (req.body.thumbnail) {
@@ -68,6 +68,14 @@ export const createProject = async (req, res) => {
     res.status(201).json(createdProject);
   } catch (error) {
     console.error("Error in createProject:", error);
+    
+    // Check if it's a MongoDB Duplicate Key Error (E11000)
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        message: "A project with this Title or Slug already exists. Please change the Title or edit the Slug." 
+      });
+    }
+    
     res.status(400).json({ message: error.message });
   }
 };
@@ -102,7 +110,7 @@ export const updateProject = async (req, res) => {
           };
       }
 
-      // UPDATED for Cloudinary: req.file.path contains the secure Cloudinary URL
+      // Cloudinary saves the secure URL in req.file.path
       if (req.file) {
         project.thumbnail = req.file.path;
       } else if (req.body.thumbnail) {
@@ -116,6 +124,14 @@ export const updateProject = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in updateProject:", error);
+    
+    // Check if it's a MongoDB Duplicate Key Error (E11000)
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        message: "A project with this Title or Slug already exists. Please change the Title or edit the Slug." 
+      });
+    }
+    
     res.status(400).json({ message: error.message });
   }
 };
@@ -127,9 +143,6 @@ export const deleteProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (project) {
-      // Note: This deletes the database record. To delete the image from Cloudinary itself, 
-      // you would normally extract the public_id and use cloudinary.uploader.destroy().
-      // For now, this safely deletes the project from your app.
       await project.deleteOne();
       res.json({ message: 'Project removed' });
     } else {
