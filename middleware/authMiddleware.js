@@ -13,8 +13,16 @@ export const protect = async (req, res, next) => {
     return res.status(401).json({ message: 'Not authorized, no token' });
   }
 
+  if (!process.env.JWT_SECRET || !process.env.ADMIN_EMAIL) {
+    return res.status(500).json({ message: 'Auth is not configured properly' });
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded?.id || decoded.id !== process.env.ADMIN_EMAIL) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
 
     req.admin = {
       id: decoded.id,

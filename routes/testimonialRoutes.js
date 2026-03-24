@@ -1,15 +1,30 @@
-import express from 'express';
-import { getTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../controllers/testimonialController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import mongoose from 'mongoose';
 
-const router = express.Router();
+const testimonialSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    role: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    quote: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    rating: {
+      type: Number,
+      default: 5,
+      min: 1,
+      max: 5
+    }
+  },
+  { timestamps: true }
+);
 
-router.route('/')
-  .get(getTestimonials)
-  .post(protect, createTestimonial);
-
-router.route('/:id')
-  .put(protect, updateTestimonial)
-  .delete(protect, deleteTestimonial);
-
-export default router;
+export default mongoose.model('Testimonial', testimonialSchema);
